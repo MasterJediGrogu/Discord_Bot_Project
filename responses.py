@@ -17,7 +17,7 @@ def retrieve_weather(city: str, api_key: str) -> str:
         weather = data["weather"][0]["description"]
         temperature = data["main"]["temp"]
         temp_in_fahrenheit = round((temperature * 1.8) + 32, 2)
-        return f"The weather in {city} is {weather} with a tempeature of {temp_in_fahrenheit}°F."
+        return f"The weather in {city} is {weather} with a temperature of {temp_in_fahrenheit}°F."
     else:
         return "Sorry, I could not get the weather for the location you provided. Try again, please"
 

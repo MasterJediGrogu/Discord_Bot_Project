@@ -96,7 +96,7 @@ async def shutdown(interaction: Interaction):
 
     # Check if the user has the required permissions
     if interaction.user.guild_permissions.administrator or interaction.user.guild_permissions.manage_channels:
-        await interaction.followup.send("Shutting down. Please contact sys admin.")
+        await interaction.followup.send("Shutting down.")
         await bot.close()  # Shutdown the bot
     else:
         # DEBUG: Which permission failed
@@ -115,7 +115,10 @@ async def shutdown(interaction: Interaction):
             role_mentions = ", ".join([role.mention for role in eligible_roles])
             alert_message = (
                 f"🚨 **Unauthorized Shutdown Attempt** 🚨\n"
+                f" "
                 f"User {interaction.user.mention} tried to shut down the bot.\n"
+                f" "
+                f" "
                 f"Alerting: {role_mentions}"
             )
 

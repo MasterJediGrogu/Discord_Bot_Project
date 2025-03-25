@@ -7,13 +7,16 @@ This project is a Discord bot that communicates with a weather API.
 In the future, I plan to include other components such as surverying local traffic
 reports, security reports on users accessing/communicating on Discord chats.
 
+# Update 3/24/25
++ Cleaned up spelling error with "temperature"
++ Included more spacing when sending alert message
 
-# Update 12/29
+
+# Update 12/29/24
 + Shutdown command includes Admin and Manage Channels Role.
-  Looking to only include myself for shutdown command in future project.
-+ End of public project now for Weather. Will include a future security bot for friends' server
+  Looking to only include myself for shutdown command in future patch.
 
-# Update 12/28
+# Update 12/28/24
 + Slash command added
 + Added shutdown command for admin users only
 
