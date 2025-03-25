@@ -4,9 +4,33 @@ from dotenv import load_dotenv
 from discord import Intents, Interaction
 from discord.ext import commands
 from responses import retrieve_weather
-
-import random # for dice roll process
 from discord import app_commands
+from discord.ui import View, Button
+
+#### Wallet Management for Blackjack/Future Games"
+import json
+WALLET = "wallets.json"
+
+def load_wallets():
+    if not os.path.exists(WALLET):
+        return {}
+    with open(WALLET, "r") as f:
+        return json.load(f)
+    
+def save_wallets(wallets):
+    with open(WALLET, "w") as f:
+        json.dump(wallets, f, indent=4)
+
+def get_balance(user_id):
+    wallets = load_wallets()
+    return wallets.get(str(user_id), 2000) 
+
+def update_balance(user_id):
+    wallets = load_wallets()
+    uid = str(user_id)
+    wallets[uid] = wallets.get(uid, 2000) + amount
+    save_wallets(wallets)
+####################################################
 
 #STEP 0: LOAD OUR TOKEN FROM SOMEWHERE SAFE
 
