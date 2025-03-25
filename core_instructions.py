@@ -6,6 +6,8 @@ from discord.ext import commands
 from responses import retrieve_weather
 from discord import app_commands
 from discord.ui import View, Button
+import random
+import discord
 
 #### Wallet Management for Blackjack/Future Games"
 import json
@@ -25,7 +27,7 @@ def get_balance(user_id):
     wallets = load_wallets()
     return wallets.get(str(user_id), 2000) 
 
-def update_balance(user_id):
+def update_balance(user_id, amount):
     wallets = load_wallets()
     uid = str(user_id)
     wallets[uid] = wallets.get(uid, 2000) + amount
@@ -67,39 +69,120 @@ async def weather(interaction: Interaction, city: str):
 
 # ==========================================================================================================
 # ==========================================================================================================
-# Dice section
-@bot.tree.command(name="roll_die", description= "Roll a die")
-@app_commands.describe(
-    sides = "# of sides on die (6 is normal)", # Parameter for sides
-    count = '# of dice to roll (1 is normal)', # Parameter for count
-)
-async def roll_die(interaction: Interaction, sides: int = 6, count: int = 1):
-    # roll a die or multiple dice and return results
+# Blackjack Section
+# Not written by me.
+def draw_card():
+    cards = {
+        'A': 11, '2': 2, '3': 3, '4': 4, '5': 5,
+        '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+        'J': 10, 'Q': 10, 'K': 10
+    }
+    card = random.choice(list(cards.keys()))
+    return card, cards[card]
 
-    try:
-        if sides < 1 or count < 1:
-            await interaction.response.send_message("Enter a positive number for both sides and count")
+def hand_value(hand):
+    value = sum(card[1] for card in hand)
+    aces = sum(1 for card in hand if card[0] == 'A')
+    while value > 21 and aces:
+        value -= 10
+        aces -= 1
+    return value
+
+def format_hand(hand):
+    return " ".join(card[0] for card in hand)
+
+class BlackjackView(View):
+    def __init__(self, player_hand, dealer_hand, interaction, bet):
+        super().__init__()
+        self.player_hand = player_hand
+        self.dealer_hand = dealer_hand
+        self.interaction = interaction
+        self.bet = bet
+        self.user_id = interaction.user.id
+
+    async def disable_all(self):
+        for child in self.children:
+            child.disabled = True
+        await self.interaction.edit_original_response(view=self)
+
+    @discord.ui.button(label = "Hit", style=discord.ButtonStyle.primary)
+    async def hit(self, interaction: Interaction, button: Button):
+
+        if interaction.user.id != self.user_id:
             return
         
-        # Die roll process
+        card = draw_card()
+        self.player_hand.append(card)
 
-        # Dice roll results as a list
-        rolls = [random.randint(1, sides) for _ in range(count)]
-        
-        # change the list into a string using join string function
+        value = hand_value(self.player_hand)
+        hand_text = format_hand(self.player_hand)
 
-        # convert list of rolls to a string
-        rolls_str = ', '.join(map(str, rolls))
+        if value > 21:
+            await self.disable_all()
+            await interaction.response.edit_message(content=f"💥 You busted with {hand_text} (**{value}**)! You lost ${self.bet}.")
+        else:
+            await interaction.response.edit_message(content=f"🃏 Your hand: {hand_text} (**{value}**)", view=self)
 
-        # Calculate total sum of rolls using sum function
-        total = sum(rolls)
+    @discord.ui.button(label = "Stand", style = discord.ButtonStyle.secondary)
+    async def stand(self, interaction: Interaction, button: Button):
 
-        # provide response back to user
-        response_to_user = f' You rolled {count} d{sides} : {rolls_str}\n**Total:** {total}'
-        await interaction.response.send_message(response_to_user)
-    except Exception as error:
-        print(f'There was an error with roll_die: {error}')
-        await interaction.response.send_message("An error happened with rolling the die")
+        if interaction.user.id != self.user_id:
+            return
+
+        await self.disable_all()
+
+        while hand_value(self.dealer_hand) < 17:
+            self.dealer_hand.append(draw_card())
+
+        player_total = hand_value(self.player_hand)
+        dealer_total = hand_value(self.dealer_hand)
+
+        dealer_text = format_hand(self.dealer_hand)
+        player_text = format_hand(self.player_hand)
+
+        if dealer_total > 21 or player_total > dealer_total:
+            update_balance(self.user_id, self.bet * 2)
+            result = f"✅ You win ${self.bet * 2}!"
+        elif dealer_total == player_total:
+            update_balance(self.user_id, self.bet)
+            result = f"🤝 It's a tie. You got your ${self.bet} back."
+        else:
+            result = f"❌ Dealer wins. You lost ${self.bet}."
+
+        await interaction.response.edit_message(
+            content=(
+                f"🃏 Your hand: {player_text} (**{player_total}**)\n"
+                f"🧑‍💼 Dealer hand: {dealer_text} (**{dealer_total}**)\n\n"
+                f"{result}"
+            ),
+            view=self
+        )
+
+@bot.tree.command(name = "blackjack", description = "Play Blackjack with a bet")
+@app_commands.describe(bet = "Amount to bet (from your wallet)")
+async def blackjack(interaction: Interaction, bet: int):
+    user_id = interaction.user.id
+    balance = get_balance(user_id)
+
+    if bet < 1:
+        await interaction.response.send_message("Your bet must be at least $1.", ephemeral=True)
+        return
+    if bet > balance:
+        await interaction.response.send_message(f"Not enough funds. You have ${balance}.", ephemeral=True)
+        return
+
+    update_balance(user_id, -bet)
+
+    player_hand = [draw_card(), draw_card()]
+    dealer_hand = [draw_card()]
+
+    value = hand_value(player_hand)
+    hand_text = format_hand(player_hand)
+
+    view = BlackjackView(player_hand, dealer_hand, interaction, bet)
+    await interaction.response.send_message(
+        f"💰 Bet: ${bet}\n🃏 Your hand: {hand_text} (**{value}**)", view=view
+    )
 
 # ==========================================================================================================
 # (ADMIN SECTION)
