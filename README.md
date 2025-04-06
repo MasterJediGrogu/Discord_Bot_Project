@@ -7,6 +7,11 @@ This project is a Discord bot that communicates with a weather API.
 In the future, I plan to include other components such as surverying local traffic
 reports, security reports on users accessing/communicating on Discord chats.
 
+# Update 4/6/25
++ Added Blackjack bot for single player use
++ Bot now named HitOrStand
++ This update took about 2 weeks to implement
+
 # Update 3/24/25
 + Cleaned up spelling error with "temperature"
 + Included more spacing when sending alert message
