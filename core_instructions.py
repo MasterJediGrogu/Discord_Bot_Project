@@ -70,7 +70,9 @@ async def weather(interaction: Interaction, city: str):
 # ==========================================================================================================
 # ==========================================================================================================
 # Blackjack Section
-# Not written by me.
+# Basic game and commands for SINGLE player only
+
+# Cards with basic values (A=11, kings, queens, joker = 10, and normal #s)
 def draw_card():
     cards = {
         'A': 11, '2': 2, '3': 3, '4': 4, '5': 5,
@@ -80,6 +82,8 @@ def draw_card():
     card = random.choice(list(cards.keys()))
     return card, cards[card]
 
+# sum basic function used to find the total value of hand
+# check to make sure values don't exceed 21
 def hand_value(hand):
     value = sum(card[1] for card in hand)
     aces = sum(1 for card in hand if card[0] == 'A')
@@ -88,9 +92,11 @@ def hand_value(hand):
         aces -= 1
     return value
 
+# convert the hand list into a string that is easily readable
 def format_hand(hand):
     return " ".join(card[0] for card in hand)
 
+# Class to manage 
 class BlackjackView(View):
     def __init__(self, player_hand, dealer_hand, interaction, bet):
         super().__init__()
@@ -99,15 +105,17 @@ class BlackjackView(View):
         self.interaction = interaction
         self.bet = bet
         self.user_id = interaction.user.id
-
+    # when turn ends, prevent user from using this
     async def disable_all(self):
         for child in self.children:
             child.disabled = True
         await self.interaction.edit_original_response(view=self)
 
+    # button for Hit
     @discord.ui.button(label = "Hit", style=discord.ButtonStyle.primary)
     async def hit(self, interaction: Interaction, button: Button):
 
+        # prevent other users from pressing the button LOL
         if interaction.user.id != self.user_id:
             return
         
@@ -117,6 +125,8 @@ class BlackjackView(View):
         value = hand_value(self.player_hand)
         hand_text = format_hand(self.player_hand)
 
+        # needed to insert this after users were having issues with games
+        # going over...
         if value > 21:
             await self.disable_all()
             await interaction.response.edit_message(content=f"💥 You busted with {hand_text} (**{value}**)! You lost ${self.bet}.")
@@ -140,7 +150,10 @@ class BlackjackView(View):
         dealer_text = format_hand(self.dealer_hand)
         player_text = format_hand(self.player_hand)
 
+        # conditionals in place for determining winner of both sides
+        # Update user's balances after each game
         if dealer_total > 21 or player_total > dealer_total:
+            # update user balance
             update_balance(self.user_id, self.bet * 2)
             result = f"✅ You win ${self.bet * 2}!"
         elif dealer_total == player_total:
@@ -158,6 +171,8 @@ class BlackjackView(View):
             view=self
         )
 
+# slash command to begin the blackjack game
+# User must bet >$1 and greater than their 
 @bot.tree.command(name = "blackjack", description = "Play Blackjack with a bet")
 @app_commands.describe(bet = "Amount to bet (from your wallet)")
 async def blackjack(interaction: Interaction, bet: int):
@@ -171,6 +186,7 @@ async def blackjack(interaction: Interaction, bet: int):
         await interaction.response.send_message(f"Not enough funds. You have ${balance}.", ephemeral=True)
         return
 
+    # update wallet balance 
     update_balance(user_id, -bet)
 
     player_hand = [draw_card(), draw_card()]
@@ -179,12 +195,12 @@ async def blackjack(interaction: Interaction, bet: int):
     value = hand_value(player_hand)
     hand_text = format_hand(player_hand)
 
+    # return the game state to the player
     view = BlackjackView(player_hand, dealer_hand, interaction, bet)
     await interaction.response.send_message(
         f"💰 Bet: ${bet}\n🃏 Your hand: {hand_text} (**{value}**)", view=view
     )
 
-# ==========================================================================================================
 # (ADMIN SECTION)
 
 #                                           =Shutdown Command=
