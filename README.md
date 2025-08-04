@@ -9,6 +9,7 @@ reports, security reports on users accessing/communicating on Discord chats.
 
 # Update 8/4/25
 + Starting "Admin Commands Project" where users are able to quickly run commands without having to right-click channels. Makes it less  of a hassle.
++ Command introduced: Slowmode
 + Cleaned Blackjack for good
 
 # Update 7/24/25
