@@ -48,6 +48,8 @@ async def weather(interaction: Interaction, city: str):
 # (ADMIN SECTION)
 
 #                                           =Shutdown Command=
+# Bot tree command creates the slash commands we e.g. "/shutdown"
+# never space out bot tree and async def from each other because this is a decorator
 @bot.tree.command(name="shutdown", description="Shutdown the bot. (Admin Use only) CAUTION: Will shut down other instances.")
 async def shutdown(interaction: Interaction):
     """
@@ -115,6 +117,38 @@ async def on_ready():
     except Exception as e:
         print(f'Error syncing commands: {e}')
 # ==========================================================================================================
+
+# (SLOWMODE SECTION)
+@bot.tree.command(name="admin_slowmode", description= "Enable slowmode delay for this channel (0 to disable)")
+@app_commands.describe(seconds= "Slowmode duration in seconds (0 = off)")
+async def slowmode(interaction: Interaction, seconds: int):
+    # always bot time seconds to process before timeout
+    await interaction.response.defer()
+
+    # Permission check: manage channels or admin
+    if not (interaction.user.guild_permissions.manage_channels or 
+            interaction.user.guild_permissions.administrator):
+        # tell them no and exit early
+        await interaction.followup.send("Invalid permissions.")
+        return
+    
+    # try & except for error issues occurring 
+    try:
+        # attempt to edit the current channel's slowmode delay
+        await interaction.channel.edit(slowmode_delay = seconds)
+
+        # message user
+        if seconds == 0:
+            await interaction.followup.send("Slowmode has been **disabled**.")
+        elif seconds == 21600:
+            await interaction.followup.send("Set to 6 hours. Breezo is now your prison warden.")
+        else:
+            await interaction.followup.send(f"Slowmode has been set to **{seconds} seconds**.")
+    except Exception as e:
+        print(f"Error setting slowmode {e}")
+        await interaction.followup.send("Failed to update slowmode.")
+
+
 
 # ==========================================================================================================
 # (MAIN ENTRY POINT)

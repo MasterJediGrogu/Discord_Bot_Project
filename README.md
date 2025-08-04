@@ -7,15 +7,18 @@ This project is a Discord bot that communicates with a weather API.
 In the future, I plan to include other components such as surverying local traffic
 reports, security reports on users accessing/communicating on Discord chats.
 
-
+# Update 8/4/25
++ Starting "Admin Commands Project" where users are able to quickly run commands without having to right-click channels. Makes it less  of a hassle.
++ Cleaned Blackjack for good
 
 # Update 7/24/25
 + Removed Blackjack bot for single player use
-+ Bot now named WhetherMyWeather
++ Bot now named ----------
 
 
 # Update 4/6/25
-+ Added Blackjack bot for single player use
++ Added Blackjack bot for single player use (guided with AI)
+Note: Not going well.....
 + Bot now named HitOrStand
 
 # Update 3/24/25
