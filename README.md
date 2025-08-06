@@ -7,6 +7,9 @@ This project is a Discord bot that communicates with a weather API.
 In the future, I plan to include other components such as surverying local traffic
 reports, security reports on users accessing/communicating on Discord chats.
 
+# Update 8/5/25
++ Command introduced: Bitrate, addition to Admin Commands Project
+
 # Update 8/4/25
 + Starting "Admin Commands Project" where users are able to quickly run commands without having to right-click channels. Makes it less  of a hassle.
 + Command introduced: Slowmode

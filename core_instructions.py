@@ -148,6 +148,34 @@ async def slowmode(interaction: Interaction, seconds: int):
         print(f"Error setting slowmode {e}")
         await interaction.followup.send("Failed to update slowmode.")
 
+# ==========================================================================================================
+
+# (BITRATE SECTION)
+@bot.tree.command(name= "admin_bitrate", description= "Change bitrate of VC")
+@app_commands.describe(val="Bitrate in kbps: min 8, max 96 (or 128 for boosted servers)")
+async def bitrate(interaction: Interaction, val: int):
+    await interaction.response.defer()
+
+    if not (interaction.user.guild_permissions.manage_channels or 
+            interaction.user.guild_permissions.administrator):
+        await interaction.followup.send("Invalid permissions.")
+        return
+
+    # Check if current channel is a VC and not a TC
+    if isinstance(interaction.channel, discord.VoiceChannel):
+    # check the command is being run in a voice channel.
+    # Bitrate can only be modified on VC text channels and not your regular text channel
+
+        try:
+            await interaction.channel.edit(bitrate=val * 1000)  # Convert kbps to bps
+            await interaction.followup.send(f"Bitrate successfully set to **{val} kbps**.")
+        except Exception as e:
+            print(f"Error changing bitrate: {e}")
+            await interaction.followup.send("Failed to change the bitrate. Check your value & server boost status")
+    else:
+        await interaction.followup.send("This command must be used in a **voice channel**.")
+
+# ==========================================================================================================
 
 
 # ==========================================================================================================
