@@ -17,7 +17,7 @@ reports, security reports on users accessing/communicating on Discord chats.
 
 # Update 7/24/25
 + Removed Blackjack bot for single player use
-+ Bot now named ----------
++ Bot now named Breezo
 
 
 # Update 4/6/25
